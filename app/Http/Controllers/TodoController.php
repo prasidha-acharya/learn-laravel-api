@@ -4,56 +4,50 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB; 
+use App\Models\Todo;
+use App\Http\Requests\storeTodoRequest;
+use App\Http\Requests\UpdateTodoRequest;
+
 
 class TodoController extends Controller
 {
     //
     public function  index () {
-
-    $data = DB::table('todos')->latest()->get();
+    $data = Todo::all();
     return response()->json($data);
     }
 
-     public function create(Request $body){
-        $data = $body->validate([
-            'title' => 'required|string|min:3',
-            'description' => 'required|string|min:3',
-            'is_completed' => 'boolean',
-        ]);
+     public function create(storeTodoRequest $body){
+        $data = $body->validated();
 
-        DB::table('todos')->insert($data + ['user_id' => "1",'created_at' => now(),
+        Todo::create($data + ['user_id' => "1",'created_at' => now(),
         'updated_at' => now(),]);
 
         return response()->json("created successfully",201);
      }
 
-     public function update(Request $body,$todoId){
-     $data = $body->validate([
-            'title' => 'sometimes|required|string|min:3',
-            'description' => 'sometimes|required|string|min:3',
-            'is_completed' => 'sometimes|boolean',
-        ]);
+     public function update(UpdateTodoRequest $body,$todoId){
+       $data = $body->validated();
 
-       $isUserAvailable = DB::table("todos")->where('id',$todoId)->first();
+       $isUserAvailable = Todo::find($todoId);
 
        if(! $isUserAvailable){
         return response()->json("No user found",404);
        }
 
-        DB::table('todos')->where('id',$todoId)->update($data + ['updated_at' => now()]);
+        Todo::find($todoId)->update($data + ['updated_at' => now()]);
         return response()->json("updated successfully $todoId",201);
      }
 
    public function delete($todoId)
 {
-    $isUserAvailable = DB::table('todos')->where('id', $todoId)->first();
+    $isUserAvailable = Todo::find($todoId);
 
     if (! $isUserAvailable) {
         return response()->json("User not found", 404);
     }
 
-    DB::table('todos')->where('id', $todoId)->delete();
-
+    Todo::find($todoId)->delete();
     return response()->json("Deleted successfully $todoId", 200);
 }
 }
