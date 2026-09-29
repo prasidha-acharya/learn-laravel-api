@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Todo;
 use App\Http\Requests\storeTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
+use App\Http\Resources\TodoResource;
+
 
 
 class TodoController extends Controller
@@ -14,7 +16,7 @@ class TodoController extends Controller
     //
     public function  index () {
     $data = Todo::all();
-    return response()->json($data);
+    return response()->json(TodoResource::collection($data));
     }
 
      public function create(storeTodoRequest $body){
